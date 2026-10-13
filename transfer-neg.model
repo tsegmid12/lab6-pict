@@ -1,0 +1,5 @@
+# [ERROR] утгуудыг ~-ээр тэмдэглэсэн — нэг мөрөнд хамгийн ихдээ нэг сөрөг утга
+From:     Valid, ~Frozen, ~Missing
+To:       Valid, ~Missing, ~SameAsFrom
+Amount:   Normal, ~Zero, ~OverBalance, ~OverLimit
+Currency: Same, Different

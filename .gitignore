@@ -3,5 +3,4 @@
 pict/
 build/
 *.docx
-README.template.md
 prepare.sh
