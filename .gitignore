@@ -1,0 +1,7 @@
+.DS_Store
+.idea/
+pict/
+build/
+*.docx
+README.template.md
+prepare.sh
