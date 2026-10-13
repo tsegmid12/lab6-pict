@@ -1,79 +1,133 @@
 # Lab 6: Pairwise Testing with PICT
 
-**Оюутан:** Э.Цэгмид
+**Оюутан:** Э.Цэгмид  
 **Оюутны код:** B232270107
 
-## Хэсэг А: Model Design
+## Хэсэг A: Model Design
 
-### 1. Сонголт ба Утгын хүснэгт (Selection/Value Table)
+### 1. Сонголт ба утгын хүснэгт (Selection/Value Table)
 
-| Параметр | Утгууд (Values) | Тайлбар |
-| :--- | :--- | :--- |
-| **From** | Valid, Frozen, Missing | Дансны төлөв |
-| **To** | Valid, Missing, SameAsFrom | Хүлээн авагчийн төлөв |
-| **Amount** | Zero, Normal, OverBalance, OverLimit | Гүйлгээний дүн |
-| **Currency** | Same, Different | Валют |
+| Параметр | Боломжит утгууд (Values) | Тайлбар |
+|---|---|---|
+| **From** | Valid, Frozen, Missing | Илгээгчийн дансны төлөв |
+| **To** | Valid, Missing, SameAsFrom | Хүлээн авагчийн дансны төлөв |
+| **Amount** | Zero, Normal, OverBalance, OverLimit | Гүйлгээний дүнгийн төрөл |
+| **Currency** | Same, Different | Дансны валют ижил эсвэл ялгаатай байх |
 
-### 2. Хязгаарлалтууд (Constraints) ба Үндэслэл
+### 2. Хязгаарлалтууд (Constraints) ба үндэслэл
 
-Дараах хязгаарлалтуудыг модельд оруулсан:
+Модельд дараах хоёр хязгаарлалтыг тодорхойлсон:
+
 - `IF [From] = "Missing" THEN [Amount] = "Normal";`
 - `IF [To] = "Missing" THEN [Amount] = "Normal";`
 
-**Үндэслэл:** Хэрэв данс алга (Missing) бол гүйлгээний дүн нь ердийн (Normal) утгатай байх ёстой, учир нь алга болох төлөв нь дүнгийн хязгаарлалттай холбогдохгүй.
+**Үндэслэл:** Илгээгчийн эсвэл хүлээн авагчийн данс байхгүй тохиолдолд гүйлгээний бусад параметрүүдийг хянахад тохиромжтой байлгахын тулд дүнг `Normal` утгаар хязгаарласан. Энэ нь тухайн тестийн моделийн сонгосон дүрэм бөгөөд бодит системийн бизнесийн шаардлагатай нийцэж байгаа эсэхийг тусад нь баталгаажуулах шаардлагатай.
 
-### 3. Тооцоолол (N $\to$ M)
-- **Нийт боломжит нэгдлүүд (N):** $3 (\text{From}) \times 3 (\text{To}) \times 4 (\text{Amount}) \times 2 (\text{Currency}) = 72$
-- **PICT-ийн гаргасан тест кейсүүд (M):** Модель бүрээс хамаарч 14-22 кейс гарсан (Жишээ нь: `transfer.model` $\to$ 14 кейс).
-- **Бууралтын хувь:** $\approx 80\%$ бууралт.
+### 3. Боломжит комбинацын тооцоолол
 
-### 4. Спецификацийн хүснэгт (Test Specifications)
+Хязгаарлалт хэрэгжүүлэхээс өмнөх бүх боломжит комбинацын тоо:
+
+\[
+N=3\times3\times4\times2=72
+\]
+
+Хоёр constraint-ийг хэрэгжүүлсний дараа:
+
+- `From = Missing` үед `Amount = Normal`.
+- `To = Missing` үед `Amount = Normal`.
+
+Эдгээр нөхцөлийг хангасан комбинацын тоо:
+
+- `From = Missing`: \(1\times3\times1\times2=6\)
+- `From ≠ Missing`, `To = Missing`: \(2\times1\times1\times2=4\)
+- `From ≠ Missing`, `To ≠ Missing`: \(2\times2\times4\times2=32\)
+
+Иймээс хүчинтэй комбинацын нийт тоо:
+
+\[
+N_{\text{valid}}=6+4+32=42
+\]
+
+PICT-ийн үүсгэсэн тестийн кейсийн тоог \(M\) гэж тэмдэглэвэл, бүх 72 комбинацтай харьцуулсан бууралтын хувь:
+
+\[
+R=\frac{72-M}{72}\times100\%
+\]
+
+Харин constraint-ийн дараах 42 хүчинтэй комбинацтай харьцуулбал:
+
+\[
+R_{\text{valid}}=\frac{42-M}{42}\times100\%
+\]
+
+**Тайлбар:** PICT-ийн бодит гаралтаас \(M\)-ийн утгыг авч байж бууралтын хувийг эцэслэн тогтооно. Pairwise testing нь бүх боломжит комбинацыг биш, хүчинтэй хослолуудыг хамруулах зорилготой тул дээрх хоёр хувийг хооронд нь ялгаж тайлбарлах хэрэгтэй.
+
+### 4. Тестийн спецификацийн хүснэгт (Test Specifications)
 
 | ID | From | To | Amount | Currency | Төрөл / Хүлээгдэх үр дүн |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | Valid | Valid | Normal | Same | Happy Path $\to$ Амжилттай |
-| 2 | Frozen | Valid | Normal | Same | Error: Account Frozen $\to$ Алдаа |
-| 3 | Valid | Missing | Normal | Same | Error: Recipient Missing $\to$ Алдаа |
-| 4 | Valid | Valid | OverBalance | Same | Error: Insufficient Funds $\to$ Алдаа |
-| 5 | Valid | Valid | OverLimit | Same | Error: Limit Exceeded $\to$ Алдаа |
-| 6 | Valid | Valid | Zero | Same | Error: Invalid Amount $\to$ Алдаа |
-| 7 | Valid | Valid | Normal | Different | Currency Conversion $\to$ Амжилттай |
-| 8 | Frozen | Missing | Normal | Different | Priority Error: Account Frozen $\to$ Алдаа |
-| 9 | Missing | Valid | Normal | Same | Error: Sender Missing $\to$ Алдаа |
-| 10 | Valid | SameAsFrom | Normal | Same | Compound: Same Account Transfer $\to$ Алдаа |
+|---:|---|---|---|---|---|
+| 1 | Valid | Valid | Normal | Same | Happy Path — гүйлгээ амжилттай |
+| 2 | Frozen | Valid | Normal | Same | Account Frozen — гүйлгээ татгалзагдана |
+| 3 | Valid | Missing | Normal | Same | Recipient Missing — гүйлгээ татгалзагдана |
+| 4 | Valid | Valid | OverBalance | Same | Insufficient Funds — үлдэгдэл хүрэлцэхгүй |
+| 5 | Valid | Valid | OverLimit | Same | Limit Exceeded — гүйлгээний лимит хэтэрсэн |
+| 6 | Valid | Valid | Zero | Same | Invalid Amount — дүн тэг байна |
+| 7 | Valid | Valid | Normal | Different | Currency Conversion — хөрвүүлэлт амжилттай |
+| 8 | Frozen | Missing | Normal | Different | Priority Error — Frozen алдааг түрүүлж буцаана |
+| 9 | Missing | Valid | Normal | Same | Sender Missing — илгээгчийн данс байхгүй |
+| 10 | Valid | SameAsFrom | Normal | Same | Same Account Transfer — ижил данс руу шилжүүлэхийг хориглоно |
 
 **Алдааны давуу эрэмбэ:**
-1. Sender Missing/Frozen $\to$ 2. Recipient Missing $\to$ 3. Amount Issues $\to$ 4. Currency Issues.
+
+1. Sender Missing / Account Frozen
+2. Recipient Missing
+3. Amount Issues
+4. Currency Issues
+
+Энэхүү эрэмбэ нь олон алдааны нөхцөл зэрэг үүссэн үед систем аль алдааг эхэлж буцаахыг тодорхойлсон бизнесийн дүрэм юм. PICT өөрөө энэ эрэмбийг шалгахгүй; харин тухайн дүрмийг баталгаажуулах тусгай тест шаардлагатай.
 
 ## Хэсэг B: Execution & Comparison
 
-### 1. Мөрийн тооны харьцуулалт
+### 1. Тестийн мөрийн тооны харьцуулалт
 
-| Модель | Мөрийн тоо (Line Count) |
-| :--- | :---: |
-| `browser-2way` | 11 |
-| `browser-3way` | 21 |
-| `transfer-nc` | 14 |
-| `transfer` | 14 |
-| `transfer-neg` | 17 |
+| Модель | Тестийн файлын нэр | Нийт мөрийн тоо |
+|---|---|---:|
+| Browser 2-way | `browser-2way.txt` | 11 |
+| Browser 3-way | `browser-3way.txt` | 21 |
+| Transfer without constraints | `transfer-nc.txt` | 14 |
+| Transfer with constraints | `transfer.txt` | 14 |
+| Transfer negative | `transfer-neg.txt` | 17 |
 
-### 2. Бодит Тест Кейсүүд (Derived from PICT)
+**Тайлбар:** Дээрх тоонууд нь туршилтын үеэр бүртгэсэн нийт мөрийн тоо юм. Хэрэв эхний мөрөнд параметрийн нэрс байгаа бол тестийн кейсийн тоо нь нийт мөрөөс нэгээр бага байна. Эцсийн тайланд эдгээр тоог `results/` хавтас дахь бодит файлуудтай тулган баталгаажуулах шаардлагатай.
 
-**Кейс 1: Happy Path**
-- **Setup:** Sender болон Recipient-ийн данс валид, дүн нь хэвийн.
-- **Input:** From=Valid, To=Valid, Amount=Normal, Currency=Same.
-- **Oracle:** Гүйлгээ амжилттай бүртгэгдэх.
+### 2. PICT-ээр үүсгэсэн тестийн кейсүүд
 
-**Кейс 2: Account Frozen (from transfer-neg)**
-- **Setup:** Илгээгчийн данс нь хөлдөөгдсөн (Frozen).
-- **Input:** From=Frozen, To=Valid, Amount=Normal, Currency=Same.
-- **Oracle:** "Error: Source account is frozen" гэсэн алдаа заана.
+#### Кейс 1: Happy Path
 
-**Кейс 3: Over Balance**
+- **Setup:** Илгээгч болон хүлээн авагчийн данс хүчинтэй, үлдэгдэл хүрэлцээтэй.
+- **Input:** `From = Valid`, `To = Valid`, `Amount = Normal`, `Currency = Same`.
+- **Хүлээгдэх үр дүн:** Гүйлгээ амжилттай бүртгэгдэнэ.
+
+#### Кейс 2: Account Frozen
+
+- **Setup:** Илгээгчийн данс хөлдөөгдсөн.
+- **Input:** `From = Frozen`, `To = Valid`, `Amount = Normal`, `Currency = Same`.
+- **Хүлээгдэх үр дүн:** Гүйлгээ татгалзагдаж, илгээгчийн данс хөлдөөгдсөн тухай алдаа буцаана.
+
+#### Кейс 3: Over Balance
+
 - **Setup:** Илгээгчийн дансны үлдэгдэл гүйлгээний дүнгээс бага.
-- **Input:** From=Valid, To=Valid, Amount=OverBalance, Currency=Same.
-- **Oracle:** "Error: Insufficient funds" гэсэн алдаа заана.
+- **Input:** `From = Valid`, `To = Valid`, `Amount = OverBalance`, `Currency = Same`.
+- **Хүлээгдэх үр дүн:** Гүйлгээ татгалзагдаж, үлдэгдэл хүрэлцэхгүй тухай алдаа буцаана.
 
-## Дүгнэлт ба Анализ
+**Анхаарах зүйл:** Эдгээр нь модель болон бизнесийн дүрэмд үндэслэсэн төлөөлөх тестийн жишээнүүд юм. Тэдгээр нь PICT-ийн гаралтад бодитоор орсон эсэхийг `results/transfer.txt` болон `results/transfer-neg.txt` файлуудаас шалгах шаардлагатай.
 
-PICT хэрэгсэл нь "Greedy" алгоритмыг ашиглан параметрүүдийн хослолыг хамгийн бага тоогоор бүрхэж,Pairwise coverage-ийг хангадаг. Энэхүү алгоритм нь тест кейс бүрийг үүсгэхдээ хамгийн олон шинэ хослолыг нэмж буй утгыг сонгож, нийт кейсийн тоог эрс багасгадаг. Миний хийсэн туршилтын үр дүнд 72 боломжит нэгдлийг ердөө 14-22 тест кейсээр бүрхэж чадсанаас үзэхэд Pairwise арга нь тестийн хугацааг хэмнэх болон үр ашгийг нэмэгдүүлэхэд маш үр дүнтэй болохыг харууллаа.
+## Дүгнэлт ба анализ
+
+Энэхүү лабораторийн ажлаар Microsoft PICT хэрэгслийг ашиглан pairwise combinatorial testing-ийн модель боловсруулж, параметрүүдийн боломжит утгууд болон тэдгээрийн хязгаарлалтыг тодорхойллоо.
+
+`browser` болон `transfer` моделийн тестийн үр дүнг харьцуулснаар pairwise testing нь параметрүүдийн бүх боломжит хослолыг хамруулахын зэрэгцээ тестийн кейсийн тоог бууруулах боломжтойг судлав. `transfer` моделийн хувьд constraint хэрэглэхээс өмнө 72 боломжит комбинац байсан бөгөөд тодорхойлсон хоёр constraint-ийн дагуу 42 хүчинтэй комбинац үлдэнэ.
+
+PICT нь хүчинтэй хослолуудыг хамарсан тестийн багц үүсгэхэд тусалдаг. Энэ нь тест зохиох ажлыг хялбарчилж, олон параметртэй системийн тестийн тоог багасгах боломж олгодог. Гэсэн хэдий ч pairwise testing нь бүх гурвалсан болон түүнээс олон параметрийн харилцан үйлчлэлийг заавал шалгахгүй.
+
+Иймээс өндөр эрсдэлтэй бизнесийн дүрэм, алдааны давуу эрэмбэ, дансны үлдэгдэл болон гүйлгээний лимит зэрэг нөхцөлд нэмэлт тестүүд шаардлагатай. Эцэст нь PICT-ийн бодит гаралт, constraint-ийн зөв хэрэгжилт болон тестийн кейсийн тоог баталгаажуулснаар үр дүнгийн найдвартай байдлыг нэмэгдүүлэх боломжтой.
