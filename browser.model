@@ -1,7 +1,6 @@
-Content:   Allow, Restrict, Block
-Cookies:   Allow, Restrict, Block
-Popups:    Yes, No
-Addons:    Yes, No
-Attacks:   Yes, No
+Content: Allow, Restrict, Block
+Cookies: Allow, Restrict, Block
+Popups: Yes, No
+Addons: Yes, No
+Attacks: Yes, No
 Forgeries: Yes, No
-

@@ -1,10 +1,7 @@
-# A2-ын хязгаарлалттай хувилбар.
-# Давуу эрэмбэ: From -> To -> Amount. Нэг мөрөнд хамгийн ихдээ НЭГ алдаа орно
-# (error masking-ээс зайлсхийх), тиймээс алдаатай утга бүр бусад параметрээ хүчинтэй байлгана.
-From:     Valid, Frozen, Missing
-To:       Valid, Missing, SameAsFrom
-Amount:   Zero, Normal, OverBalance, OverLimit
+From: Valid, Frozen, Missing
+To: Valid, Missing, SameAsFrom
+Amount: Zero, Normal, OverBalance, OverLimit
 Currency: Same, Different
 
-IF [From] <> "Valid" THEN [To] = "Valid" AND [Amount] = "Normal";
-IF [To] <> "Valid" THEN [From] = "Valid" AND [Amount] = "Normal";
+IF [From] = "Missing" THEN [Amount] = "Normal";
+IF [To] = "Missing" THEN [Amount] = "Normal";
