@@ -95,7 +95,7 @@ R_{\text{valid}}=\frac{42-M}{42}\times100\%
 | Browser 2-way | `browser-2way.txt` | 11 |
 | Browser 3-way | `browser-3way.txt` | 21 |
 | Transfer without constraints | `transfer-nc.txt` | 14 |
-| Transfer with constraints | `transfer.txt` | 14 |
+| Transfer with constraints | `transfer.txt` | 13 |
 | Transfer negative | `transfer-neg.txt` | 17 |
 
 **Тайлбар:** Дээрх тоонууд нь туршилтын үеэр бүртгэсэн нийт мөрийн тоо юм. Хэрэв эхний мөрөнд параметрийн нэрс байгаа бол тестийн кейсийн тоо нь нийт мөрөөс нэгээр бага байна. Эцсийн тайланд эдгээр тоог `results/` хавтас дахь бодит файлуудтай тулган баталгаажуулах шаардлагатай.
