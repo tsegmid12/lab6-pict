@@ -77,6 +77,39 @@ R_{\text{valid}}=\frac{42-M}{42}\times100\%
 | 9 | Missing | Valid | Normal | Same | Sender Missing — илгээгчийн данс байхгүй |
 | 10 | Valid | SameAsFrom | Normal | Same | Same Account Transfer — ижил данс руу шилжүүлэхийг хориглоно |
 
+### 5. PICT-ийн үр дүнгийн тэмдэглэгээ (Annotated Results)
+
+**Тэмдэглэгээний утга:**
+- `[ERROR]`: тухайн утга системийн алдаа үүсгэнэ (`transfer-neg` загварт `~` угтвартай).
+- `[SINGLE]`: алдааг ганцаарчлан шалгана, өөр параметрүүд хүчинтэй утгатай байна.
+- `[IF]`: constraint-ийн нөхцөл болох эсвэл constraint-ээр тогтоогдсон утга.
+
+**A2. Утга бүрийн тэмдэглэгээ ба A3. хүлээгдэх алдааны код:**
+
+| Параметр | Утга | Тэмдэглэгээ | Хүлээгдэх код (A3) |
+|---|---|---|---|
+| From | Valid | — | — |
+| From | Frozen | `[ERROR]` `[SINGLE]` | `ERROR_SENDER_FROZEN` |
+| From | Missing | `[ERROR]` `[SINGLE]` `[IF]` (нөхцөл: Amount = Normal) | `ERROR_SENDER_MISSING` |
+| To | Valid | — | — |
+| To | Missing | `[ERROR]` `[SINGLE]` `[IF]` (нөхцөл: Amount = Normal) | `ERROR_RECIPIENT_MISSING` |
+| To | SameAsFrom | `[ERROR]` `[SINGLE]` | `ERROR_SAME_ACCOUNT` |
+| Amount | Zero | `[ERROR]` `[SINGLE]` | `ERROR_INVALID_AMOUNT` |
+| Amount | Normal | `[IF]` (From/To = Missing үед заавал энэ утга) | — |
+| Amount | OverBalance | `[ERROR]` `[SINGLE]` | `ERROR_INVALID_AMOUNT` |
+| Amount | OverLimit | `[ERROR]` `[SINGLE]` | `ERROR_INVALID_AMOUNT` |
+| Currency | Same | — | — |
+| Currency | Different | — (хөрвүүлэлт, алдаа биш) | — |
+
+**Хүлээгдэх алдааны кодууд:**
+- `ERROR_SENDER_MISSING`: Илгээгч байхгүй
+- `ERROR_SENDER_FROZEN`: Илгээгч хөлдөөгдсөн
+- `ERROR_RECIPIENT_MISSING`: Хүлээн авагч байхгүй
+- `ERROR_INVALID_AMOUNT`: Дүн буруу (Zero, OverBalance, OverLimit)
+- `ERROR_SAME_ACCOUNT`: Ижил данс руу шилжүүлэлт
+
+**Анхаарах зүйл:** OverBalance болон OverLimit нь тестийн спецификацид тусдаа нэртэй (Insufficient Funds, Limit Exceeded) боловч дээрх жагсаалтад нэг `ERROR_INVALID_AMOUNT` код хуваалцаж байна. Бодит API тусдаа код буцаадаг бол энэ хүснэгтийг түүнд тааруулна.
+
 **Алдааны давуу эрэмбэ:**
 
 1. Sender Missing / Account Frozen
@@ -92,35 +125,79 @@ R_{\text{valid}}=\frac{42-M}{42}\times100\%
 
 | Модель | Тестийн файлын нэр | Нийт мөрийн тоо |
 |---|---|---:|
-| Browser 2-way | `browser-2way.txt` | 11 |
-| Browser 3-way | `browser-3way.txt` | 21 |
-| Transfer without constraints | `transfer-nc.txt` | 14 |
-| Transfer with constraints | `transfer.txt` | 13 |
-| Transfer negative | `transfer-neg.txt` | 17 |
+| Browser 2-way | `browser-2way.txt` | 11 (10 тест) |
+| Browser 3-way | `browser-3way.txt` | 21 (20 тест) |
+| Transfer without constraints | `transfer-nc.txt` | 14 (13 тест) |
+| Transfer with constraints | `transfer.txt` | 13 (12 тест) |
+| Transfer negative | `transfer-neg.txt` | 17 (16 тест) |
 
-**Тайлбар:** Дээрх тоонууд нь туршилтын үеэр бүртгэсэн нийт мөрийн тоо юм. Хэрэв эхний мөрөнд параметрийн нэрс байгаа бол тестийн кейсийн тоо нь нийт мөрөөс нэгээр бага байна. Эцсийн тайланд эдгээр тоог `results/` хавтас дахь бодит файлуудтай тулган баталгаажуулах шаардлагатай.
+**Тайлбар:** Хаалт доторх тоо нь эхний толгой мөрийг хассан тестийн кейсийн тоо; хүснэгтийн үндсэн тоо нь файл дахь нийт мөрийн тоо. `results/*.txt` файлуудыг UTF-8 кодчиллоор хадгалсан.
+
+`pict ... | tee` ашиглан үүсгэсэн UTF-16 файлыг UTF-8 болгох PowerShell команд:
+
+```powershell
+Get-Content -Encoding Unicode results\transfer-neg.txt |
+  Set-Content -Encoding UTF8 results\transfer-neg.txt
+```
+
+Ижил аргаар бусад `results\*.txt` файлыг хөрвүүлж болно. Энэ commit-д байгаа бүх үр дүнгийн файл аль хэдийн UTF-8 (BOM)-аар хадгалагдсан.
 
 ### 2. PICT-ээр үүсгэсэн тестийн кейсүүд
 
-#### Кейс 1: Happy Path
+> **Тэмдэглэл:** Гурван кейсийн "Эх мөр" нь `results/transfer-neg.txt`-ийн толгой мөрийн дараах 16 мөрөөс шууд сонгосон. `~` тэмдэглэгээг body-д оруулахгүй; тухайн утга сөрөг oracle сонгоход ашиглагдана. Доорх body нь API-ийн жишиг хэлбэр бөгөөд бодит endpoint-ийн талбарын нэртэй тулгана.
 
-- **Setup:** Илгээгч болон хүлээн авагчийн данс хүчинтэй, үлдэгдэл хүрэлцээтэй.
-- **Input:** `From = Valid`, `To = Valid`, `Amount = Normal`, `Currency = Same`.
-- **Хүлээгдэх үр дүн:** Гүйлгээ амжилттай бүртгэгдэнэ.
+#### Кейс 1: Happy Path (`transfer-neg.txt`-ийн тестийн 1-р мөр, файл дахь 2-р мөр)
 
-#### Кейс 2: Account Frozen
+- **Эх мөр:** `Valid  Valid  Normal  Same`
+- **Transfer body:**
+  ```json
+  { "from": "ACC-VALID-1", "to": "ACC-VALID-2", "amount": 100, "currency": "MNT" }
+  ```
+- **Статус + result oracle:** HTTP `200 OK`, `result: SUCCESS`; гүйлгээ бүртгэгдэж, илгээгчээс дүн хасагдаж, хүлээн авагчид нэмэгдэнэ.
 
-- **Setup:** Илгээгчийн данс хөлдөөгдсөн.
-- **Input:** `From = Frozen`, `To = Valid`, `Amount = Normal`, `Currency = Same`.
-- **Хүлээгдэх үр дүн:** Гүйлгээ татгалзагдаж, илгээгчийн данс хөлдөөгдсөн тухай алдаа буцаана.
+#### Кейс 2: Account Frozen (`transfer-neg.txt`-ийн тестийн 12-р мөр, файл дахь 13-р мөр)
 
-#### Кейс 3: Over Balance
+- **Эх мөр:** `~Frozen  Valid  Normal  Same` (`~` нь гаралтад угтвартай гарна, body-д хасаж бодит утгыг авна)
+- **Transfer body:**
+  ```json
+  { "from": "ACC-FROZEN", "to": "ACC-VALID-2", "amount": 100, "currency": "MNT" }
+  ```
+- **Статус + result oracle:** HTTP `403 Forbidden`, `result: ERROR_SENDER_FROZEN`; үлдэгдэл өөрчлөгдөхгүй.
 
-- **Setup:** Илгээгчийн дансны үлдэгдэл гүйлгээний дүнгээс бага.
-- **Input:** `From = Valid`, `To = Valid`, `Amount = OverBalance`, `Currency = Same`.
-- **Хүлээгдэх үр дүн:** Гүйлгээ татгалзагдаж, үлдэгдэл хүрэлцэхгүй тухай алдаа буцаана.
+#### Кейс 3: Over Balance (`transfer-neg.txt`-ийн тестийн 6-р мөр, файл дахь 7-р мөр)
 
-**Анхаарах зүйл:** Эдгээр нь модель болон бизнесийн дүрэмд үндэслэсэн төлөөлөх тестийн жишээнүүд юм. Тэдгээр нь PICT-ийн гаралтад бодитоор орсон эсэхийг `results/transfer.txt` болон `results/transfer-neg.txt` файлуудаас шалгах шаардлагатай.
+- **Эх мөр:** `Valid  Valid  ~OverBalance  Same`
+- **Transfer body:**
+  ```json
+  { "from": "ACC-VALID-1", "to": "ACC-VALID-2", "amount": 999999999, "currency": "MNT" }
+  ```
+- **Статус + result oracle:** HTTP `422 Unprocessable Entity`, `result: ERROR_INVALID_AMOUNT`; үлдэгдэл өөрчлөгдөхгүй.
+
+**Мөрийн бүтэц (`transfer-neg.txt`, толгойтойгоо 17 мөр):** 2 мөр нь `~`-гүй эерэг мөр (`Valid Valid Normal Same/Different`), үлдсэн 14 мөр нь 7 сөрөг утга (`~Frozen`, `~Missing` (From), `~Missing` (To), `~SameAsFrom`, `~Zero`, `~OverBalance`, `~OverLimit`) тус бүр `Currency = Same/Different` хоёртой хосолсон. Мөр бүрд ганц `~` утга байгаа тул мөр бүр яг нэг `ERROR_*` кодод харгалзана.
+
+### 3. Greedy алгоритмын тайлбар
+
+PICT нь pairwise багцыг greedy (шунахай) heuristic-ээр үүсгэдэг. Эхлээд бүх хүчинтэй хос (pair)-ын жагсаалтыг гаргана. Дараа нь алхам бүрт одоогоор хамрагдаагүй хосуудаас хамгийн олныг нэг дор хамарах тест кейсийг сонгож багцад нэмнэ. Бүх хос хамрагдтал үүнийг давтана.
+
+Энэ арга хурдан боловч хамгийн цөөн мөр өгөхийг баталгаажуулдаггүй. Тиймээс `/r:N` (seed) өөрчлөхөд мөрийн тоо бага зэрэг ялгаатай гарч болно. Лабын тайланд давтагдах үр дүн авахын тулд тогтмол seed (`/r:7`) ашиглахыг зөвлөнө.
+
+### 4. Гурван хувилбарын харьцуулалт
+
+| Хувилбар | Файл | Нийт мөр (толгойтой) | Тест кейс | Happy path мөр | Нэг мөр дэх алдаа |
+|---|---|---:|---:|---|---|
+| Constraint-гүй | `transfer-nc.txt` | 14 | 13 | 1 (`Valid Valid Normal Different`) | Нэг мөрөнд хэд хэдэн алдаа зэрэг орж болно (ж: `Missing` + `OverLimit`) |
+| Constraint-тай | `transfer.txt` | 13 | 12 | 0 | `Missing` үед `Amount = Normal` болох тул зарим давхцал хасагдсан ч `Frozen` + `Missing` зэрэг хослол үлдэнэ |
+| Сөрөг (`~`) | `transfer-neg.txt` | 17 | 16 | 2 (`Valid Valid Normal Same/Different`) | Мөр бүрд ганц `~` утга, 14 мөр тус бүр нэг алдаа |
+
+`transfer-neg.txt` нь толгой мөрөөс гадна яг 16 тестийн мөртэй. `transfer-nc.txt` болон `transfer.txt` нь тус бүр 13 болон 12 тестийн мөртэй. Мөрийн тоог шалгах PowerShell команд: `Get-ChildItem results\*.txt | ForEach-Object { [PSCustomObject]@{ File=$_.Name; Lines=(Get-Content -Encoding UTF8 $_.FullName).Count } }`.
+
+### 5. `~` (сөрөг утга) ба constraint
+
+- PICT-ийн `~` нь тухайн утгыг negative value гэж тэмдэглэдэг болохоос constraint биш. Энэ загварт нэг мөрөнд нэг `~` утга гарах байдлаар сөрөг oracle-уудыг тусад нь шалгах боломжтой болсон.
+- `~` утгуудыг хооронд нь хослуулахгүй гэсэн дүрэм энэ гаралтад харагдаж байгаа боловч PICT-ийн ерөнхий баталгаа биш; өөр negative model эсвэл seed ашиглахад гаралт өөр байж болно.
+- `transfer-neg.model` нь `From: Valid, ~Frozen, ~Missing`, `To: Valid, ~Missing, ~SameAsFrom`, `Amount: Normal, ~Zero, ~OverBalance, ~OverLimit`, `Currency: Same, Different` гэж тодорхойлогдсон. Сөрөг утга нийт 7, тус бүр 2 мөрт орсон тул 7 × 2 = 14 сөрөг мөр, дээр нь 2 эерэг мөр нийлээд 16 мөр болно.
+- Энэ загварт `~Missing` (From болон To) мөрүүдэд `Amount = Normal` байна. `transfer-neg.model` дотор constraint бичээгүй тул энэ нь `~`-тэй model-ийн гаралт бөгөөд `transfer.model` дэх `IF` constraint үйлчилснээс болсон гэж дүгнэж болохгүй.
+- Иймээс `~` мөрүүдэд constraint хэрэгждэг гэж баталгаатай хэлэхгүй. Constraint-ийг шалгах бол `transfer.model`-ийн эерэг утгатай гаралтыг ашиглах хэрэгтэй; харин `transfer-neg.txt` нь нэг мөрийн нэг алдааны oracle-ийг шалгахад зориулагдана.
 
 ## Дүгнэлт ба анализ
 
