@@ -125,11 +125,11 @@ R_{\text{valid}}=\frac{42-M}{42}\times100\%
 
 | Модель | Тестийн файлын нэр | Нийт мөрийн тоо |
 |---|---|---:|
-| Browser 2-way | `browser-2way.txt` | 11 (10 тест) |
-| Browser 3-way | `browser-3way.txt` | 21 (20 тест) |
-| Transfer without constraints | `transfer-nc.txt` | 14 (13 тест) |
-| Transfer with constraints | `transfer.txt` | 13 (12 тест) |
-| Transfer negative | `transfer-neg.txt` | 17 (16 тест) |
+| Browser 2-way | `browser-2way.txt` | 10 |
+| Browser 3-way | `browser-3way.txt` | 20 |
+| Transfer without constraints | `transfer-nc.txt` | 13 |
+| Transfer with constraints | `transfer.txt` | 12 |
+| Transfer negative | `transfer-neg.txt` | 16 |
 
 **Тайлбар:** Хаалт доторх тоо нь эхний толгой мөрийг хассан тестийн кейсийн тоо; хүснэгтийн үндсэн тоо нь файл дахь нийт мөрийн тоо. `results/*.txt` файлуудыг UTF-8 кодчиллоор хадгалсан.
 
