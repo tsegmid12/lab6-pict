@@ -1,4 +1,19 @@
-﻿Pairwise Independent Combinatorial Testing
+﻿PICT build and usage evidence
+
+Source repository: https://github.com/microsoft/pict
+Source commit: ab76c2548f551fcb46314e58653a1bd1172f3a72
+Source commit URL: https://github.com/microsoft/pict/commit/ab76c2548f551fcb46314e58653a1bd1172f3a72
+
+The PICT source code is not included in this student repository.
+
+Build/use command:
+  pict.exe transfer.model /r:7
+  pict.exe transfer-nc.model /r:7
+  pict.exe transfer-neg.model /r:7
+  pict.exe browser.model /o:2 /r:7
+  pict.exe browser.model /o:3 /r:7
+
+Pairwise Independent Combinatorial Testing
 
 Usage: pict model [options]
 
