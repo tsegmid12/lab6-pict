@@ -1,0 +1,12 @@
+# [ERROR] утгуудыг ~-ээр тэмдэглэв — нэг мөрөнд хамгийн ихдээ 1 сөрөг утга
+From:      Valid, ~Frozen, ~Missing
+To:        Valid, ~Missing, ~SameAsFrom
+Amount:    Normal, EqualBalance, EqualLimit, ~Zero, ~Negative, ~OverBalance, ~OverLimit
+Currency:  Same, Different
+DailyUsed: None, Partial
+
+# ~ нь ERROR-ийг тусгаарлах тул From/To-гийн IF хязгаарлалт хэрэггүй болсон.
+# Харин [SINGLE] ба [IF]-ийг ~ орлохгүй — хэвээр үлдэнэ:
+IF [Amount] = "EqualBalance" THEN [Currency] = "Same" AND [DailyUsed] = "None";
+IF [Amount] = "EqualLimit"   THEN [Currency] = "Same" AND [DailyUsed] = "Partial";
+IF [Amount] = "OverLimit" THEN [DailyUsed] = "Partial";

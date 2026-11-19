@@ -1,0 +1,17 @@
+# Хэсэг A-гийн сонголтууд + A2-ын хязгаарлалтууд
+From:      Valid, Frozen, Missing
+To:        Valid, Missing, SameAsFrom
+Amount:    Normal, EqualBalance, EqualLimit, Zero, Negative, OverBalance, OverLimit
+Currency:  Same, Different
+DailyUsed: None, Partial
+
+# [ERROR] from: бусад бүх сонголт хүчинтэй байх ёстой (error masking-аас сэргийлнэ)
+IF [From] <> "Valid" THEN [To] = "Valid" AND [Amount] = "Normal";
+# [ERROR] to: amount хүчинтэй байх ёстой
+IF [To] <> "Valid" THEN [Amount] = "Normal";
+# [ERROR] amount (Zero, Negative, OverBalance, OverLimit): from/to хүчинтэй — дээрх 2 дүрмээр аль хэдийн хангагдсан
+# [SINGLE] хязгаарын утгууд: нэг л удаа, хамгийн энгийн орчинд
+IF [Amount] = "EqualBalance" THEN [Currency] = "Same" AND [DailyUsed] = "None";
+IF [Amount] = "EqualLimit"   THEN [Currency] = "Same" AND [DailyUsed] = "Partial";
+# [IF Positive] лимитийн хэтрэлт зөвхөн өмнө нь зарцуулсан үед утга учиртай байлгах
+IF [Amount] = "OverLimit" THEN [DailyUsed] = "Partial";
