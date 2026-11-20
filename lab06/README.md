@@ -6,7 +6,7 @@
 
 ## 1. PICT орчин
 
-PICT 3.7.4-ийг эх кодоос `mingw32-make pict` командаар бүтээсэн. Эх код болон
+PICT 3.7.4-ийг эх кодоос `mingw32-make -B pict` командаар бүтээсэн. Эх код болон
 build-ийн хавтас энэ репозитороос гадна `C:\Users\tsegm\tools\pict` дотор байна.
 Нотолгоо нь [results/pict-build.txt](results/pict-build.txt)-д хадгалагдсан.
 
@@ -42,8 +42,18 @@ build-ийн хавтас энэ репозитороос гадна `C:\Users\t
 | Алдаатай from/to үед amount | `[IF]` | Error masking-ээс сэргийлж `Amount=Normal` байлгана. |
 
 Хязгаарлалтгүй бүрэн олонлогийн хэмжээ:
-`3 × 3 × 7 × 2 × 2 = 252`. Дээрх IF дүрмүүдийг хэрэгжүүлсний дараах
-хүчинтэй category combination-уудын тоо `44`, өөрөөр хэлбэл **252 → 44**.
+`3 × 3 × 7 × 2 × 2 = 252`.
+
+IF дүрмүүдийг хэрэгжүүлсний дараах хүчинтэй комбинацийн тоог дараах байдлаар
+тооцно:
+
+- `From=Frozen/Missing`: `2 × 1 × 1 × 2 × 2 = 8` (To зөв, Amount Normal).
+- `From=Valid`, `To=Missing/SameAsFrom`: `1 × 2 × 1 × 2 × 2 = 8` (Amount Normal).
+- `From=Valid`, `To=Valid`: `4 × 2 × 2 + 1 + 1 + 2 = 20`. Энд Normal/Zero/Negative/OverBalance тус бүр 4, EqualBalance 1, EqualLimit 1, OverLimit 2 боломжтой.
+
+Иймээс нийт `8 + 8 + 20 = 36`, өөрөөр хэлбэл **252 → 36** хүчинтэй
+category combination үлдэнэ. Энэ 36 нь бүх боломжит хүчинтэй комбинацийн тоо;
+PICT-ийн covering array-ийн гаралтын мөрийн тоотой адил ойлголт биш.
 
 ### A3. Спецификацийн хүснэгт
 
@@ -98,11 +108,15 @@ environment-ийн IF дүрмүүдийг бүрэн орлохгүй.
 
 ### B3. PICT мөрөөс бодит тест кейс
 
-| Кейc | Setup | Transfer body | Oracle |
-|---|---|---|---|
-| T01 happy | `A-100` идэвхтэй, 1000 USD; `B-200` идэвхтэй; өдөрт 0 ашигласан | `{"from":"A-100","to":"B-200","amount":100,"currency":"USD"}` | 201, `{"result":"OK"}` |
-| T02 нэг negative | `A-100` идэвхтэй, 1000 USD; `B-200` идэвхтэй | `{"from":"A-100","to":"B-200","amount":-10,"currency":"USD"}` | 200, `ERROR_BAD_AMOUNT` |
-| T03 negative from | `A-100` царцаасан; `B-200` идэвхтэй; amount-ийг энгийн байлгана | `{"from":"A-100","to":"B-200","amount":100,"currency":"USD"}` | 200, `ERROR_FROZEN` |
+Доорх setup-ууд нь `results/transfer-neg.txt`-ийн бодит мөрүүдтэй
+тааруулсан. `DailyUsed` нь хүсэлтийн body-д биш, тестийн орчны setup-д
+тохируулна.
+
+| Кейc | PICT мөр (From, To, Amount, Currency, DailyUsed) | Setup | Transfer body | Oracle |
+|---|---|---|---|---|
+| T01 happy | `Valid, Valid, Normal, Same, Partial` | `A-100` идэвхтэй, 1000 USD; `B-200` идэвхтэй; өдөрт лимитийн хэсгийг ашигласан | `{"from":"A-100","to":"B-200","amount":100,"currency":"USD"}` | 201, `{"result":"OK"}` |
+| T02 нэг negative | `Valid, Valid, ~Negative, Same, Partial` | `A-100` идэвхтэй, 1000 USD; `B-200` идэвхтэй; өдөрт лимитийн хэсгийг ашигласан | `{"from":"A-100","to":"B-200","amount":-10,"currency":"USD"}` | 200, `ERROR_BAD_AMOUNT` |
+| T03 negative from | `~Frozen, Valid, Normal, Different, Partial` | `A-100` царцаасан; `B-200` идэвхтэй; өдөрт лимитийн хэсгийг ашигласан | `{"from":"A-100","to":"B-200","amount":100,"currency":"USD"}` | 200, `ERROR_FROZEN` |
 
 ## 4. Дүгнэлт
 
