@@ -1,4 +1,4 @@
-Content	Cookies	Popups	Addons	Attacks	Forgeries
+﻿Content	Cookies	Popups	Addons	Attacks	Forgeries
 Allow	Restrict	Yes	No	No	Yes
 Block	Allow	Yes	Yes	Yes	No
 Restrict	Restrict	No	No	Yes	No

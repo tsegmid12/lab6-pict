@@ -1,4 +1,4 @@
-From	To	Amount	Currency	DailyUsed
+﻿From	To	Amount	Currency	DailyUsed
 Valid	Missing	EqualLimit	Same	None
 Frozen	Valid	Negative	Different	Partial
 Missing	Missing	OverLimit	Same	Partial
