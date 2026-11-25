@@ -1,8 +1,8 @@
+
 From: Valid, ~Frozen, ~Missing
 To: Valid, ~Missing, ~SameAsFrom
-Amount: Normal, EqualBalance, EqualLimit, ~Zero, ~Negative, ~OverBalance, ~OverLimit
+Amount: Normal, ~Zero, ~Negative, ~OverBalance, ~OverLimit
 Currency: Same, Different
-DailyUsed: None, Partial
 
-IF [Amount] = "EqualBalance" THEN [Currency] = "Same" AND [DailyUsed] = "None";
-IF [Amount] = "EqualLimit" THEN [Currency] = "Same" AND [DailyUsed] = "Partial";
+IF [From] = "~Missing" THEN [Amount] = "Normal";
+IF [To] = "~Missing" THEN [Amount] = "Normal";
