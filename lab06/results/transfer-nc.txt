@@ -1,17 +1,18 @@
-From	To	Amount	Currency
-Valid	Valid	Normal	Same
-Valid	SameAsFrom	Negative	Different
-Frozen	Valid	Zero	Different
-Missing	Missing	Negative	Same
-Missing	SameAsFrom	Normal	Different
-Valid	Missing	Zero	Same
-Frozen	SameAsFrom	OverBalance	Same
-Frozen	Missing	Normal	Different
-Missing	SameAsFrom	OverLimit	Same
-Frozen	Missing	OverLimit	Different
-Missing	Valid	Zero	Same
-Frozen	Valid	Negative	Different
-Valid	Valid	OverBalance	Different
-Missing	Missing	OverBalance	Different
-Valid	SameAsFrom	Zero	Same
-Valid	Valid	OverLimit	Different
+From	To	Amount	Currency	Authentication
+Frozen	Valid	OverLimit	Same	OTP
+Frozen	SameAsFrom	Normal	Different	None
+Valid	Missing	Zero	Same	None
+Valid	Valid	Negative	Different	Password
+Missing	Missing	OverBalance	Same	Password
+Valid	SameAsFrom	Normal	Same	OTP
+Missing	Missing	OverLimit	Different	OTP
+Frozen	Valid	Zero	Different	Password
+Missing	Missing	Negative	Same	None
+Frozen	SameAsFrom	OverBalance	Different	OTP
+Missing	SameAsFrom	Zero	Same	OTP
+Missing	Valid	OverLimit	Same	None
+Valid	SameAsFrom	OverLimit	Different	Password
+Missing	Valid	Normal	Different	Password
+Frozen	Missing	Normal	Different	OTP
+Frozen	SameAsFrom	Negative	Different	OTP
+Valid	Valid	OverBalance	Same	None

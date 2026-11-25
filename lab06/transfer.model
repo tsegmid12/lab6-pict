@@ -1,8 +1,9 @@
-
 From: Valid, Frozen, Missing
 To: Valid, Missing, SameAsFrom
 Amount: Normal, Zero, Negative, OverBalance, OverLimit
 Currency: Same, Different
+DailyUsed: None, Partial
 
-IF [From] = "Missing" THEN [Amount] = "Normal";
-IF [To] = "Missing" THEN [Amount] = "Normal";
+IF [From] <> "Valid" THEN [Amount] = "Normal";
+IF [To] <> "Valid" THEN [Amount] = "Normal";
+IF [Amount] = "OverLimit" THEN [DailyUsed] = "Partial";

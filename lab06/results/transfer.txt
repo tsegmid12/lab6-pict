@@ -1,16 +1,17 @@
-From	To	Amount	Currency
-Valid	Valid	Normal	Same
-Frozen	SameAsFrom	OverLimit	Different
-Frozen	Valid	OverLimit	Same
-Valid	Valid	Negative	Different
-Valid	SameAsFrom	Zero	Same
-Missing	Missing	Normal	Different
-Valid	SameAsFrom	OverBalance	Same
-Frozen	SameAsFrom	Negative	Same
-Frozen	Valid	Zero	Different
-Valid	Missing	Normal	Same
-Frozen	Valid	OverBalance	Different
-Missing	Valid	Normal	Same
-Missing	SameAsFrom	Normal	Different
-Frozen	Missing	Normal	Same
-Valid	Valid	OverLimit	Same
+From	To	Amount	Currency	DailyUsed
+Valid	Valid	OverBalance	Different	None
+Valid	Valid	Negative	Different	Partial
+Valid	Valid	OverLimit	Different	Partial
+Valid	SameAsFrom	Normal	Same	None
+Missing	Valid	Normal	Same	Partial
+Frozen	Valid	Normal	Same	None
+Valid	Valid	OverBalance	Same	Partial
+Valid	Valid	Zero	Same	Partial
+Valid	Missing	Normal	Same	None
+Valid	Valid	Zero	Different	None
+Missing	Missing	Normal	Different	None
+Missing	SameAsFrom	Normal	Different	Partial
+Frozen	SameAsFrom	Normal	Different	Partial
+Valid	Valid	OverLimit	Same	Partial
+Valid	Valid	Negative	Same	None
+Frozen	Missing	Normal	Different	Partial

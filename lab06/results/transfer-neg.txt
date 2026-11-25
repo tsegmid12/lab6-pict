@@ -1,19 +1,31 @@
-From	To	Amount	Currency
-Valid	Valid	Normal	Same
-Valid	Valid	Normal	Different
-Valid	Valid	~OverBalance	Different
-Valid	Valid	~Zero	Different
-Valid	Valid	~Negative	Different
-Valid	Valid	~Zero	Same
-Valid	Valid	~OverLimit	Different
-Valid	Valid	~OverBalance	Same
-~Missing	Valid	Normal	Same
-Valid	~Missing	Normal	Same
-Valid	~SameAsFrom	Normal	Different
-~Missing	Valid	Normal	Different
-~Frozen	Valid	Normal	Different
-Valid	Valid	~Negative	Same
-Valid	~Missing	Normal	Different
-Valid	~SameAsFrom	Normal	Same
-Valid	Valid	~OverLimit	Same
-~Frozen	Valid	Normal	Same
+From	To	Amount	Currency	Channel
+Valid	Valid	Normal	Different	Web
+Valid	Valid	Normal	Same	ATM
+Valid	Valid	Normal	Different	Mobile
+Valid	Valid	Normal	Same	Web
+Valid	Valid	Normal	Same	Mobile
+Valid	Valid	~OverBalance	Same	Web
+~Frozen	Valid	Normal	Different	Mobile
+Valid	Valid	~OverBalance	Same	Mobile
+Valid	Valid	~Negative	Same	Mobile
+Valid	Valid	~Zero	Different	Mobile
+Valid	Valid	~Negative	Different	Web
+Valid	Valid	~OverLimit	Same	ATM
+Valid	~Missing	Normal	Same	Web
+Valid	~SameAsFrom	Normal	Same	ATM
+Valid	Valid	~OverBalance	Same	ATM
+Valid	Valid	~OverLimit	Different	Mobile
+~Missing	Valid	Normal	Different	Mobile
+Valid	~Missing	Normal	Same	ATM
+Valid	Valid	~Zero	Same	ATM
+~Missing	Valid	Normal	Same	ATM
+Valid	Valid	~Zero	Different	Web
+~Frozen	Valid	Normal	Same	ATM
+Valid	~SameAsFrom	Normal	Different	Mobile
+~Frozen	Valid	Normal	Different	Web
+Valid	Valid	~Negative	Same	ATM
+Valid	~Missing	Normal	Different	Mobile
+Valid	~SameAsFrom	Normal	Different	Web
+Valid	Valid	~OverBalance	Different	Web
+Valid	Valid	~OverLimit	Same	Web
+~Missing	Valid	Normal	Different	Web

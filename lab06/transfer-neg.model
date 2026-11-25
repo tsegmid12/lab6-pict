@@ -1,8 +1,7 @@
-
 From: Valid, ~Frozen, ~Missing
 To: Valid, ~Missing, ~SameAsFrom
 Amount: Normal, ~Zero, ~Negative, ~OverBalance, ~OverLimit
 Currency: Same, Different
+Channel: Mobile, Web, ATM
 
-IF [From] = "~Missing" THEN [Amount] = "Normal";
-IF [To] = "~Missing" THEN [Amount] = "Normal";
+IF [Channel] = "ATM" THEN [Currency] = "Same";
