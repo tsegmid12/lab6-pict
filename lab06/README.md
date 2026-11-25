@@ -203,9 +203,11 @@ Browser-ийн тохиргооны параметрүүдийг `browser.model`
 
 #### B3.1. Сонгосон PICT тест кейсүүд
 
-| Test ID | PICT мөр | Файл дахь мөр | Зорилго |
+> Доорх мөрийн дугаар нь header мөрийг тооцохгүйгээр, зөвхөн өгөгдлийн мөрийг дугаарласан болно.
+
+| Test ID | PICT мөр | Өгөгдлийн мөр | Зорилго |
 |---|---|---:|---|
-| T01 | `Valid, Valid, Normal, Same, ATM` | 2 | Happy Path |
+| T01 | `Valid, Valid, Normal, Same, ATM` | 3 | Happy Path |
 | T02 | `Valid, Valid, ~Negative, Different, Web` | 11 | Сөрөг дүнгийн шалгалт |
 | T03 | `~Frozen, Valid, Normal, Different, Mobile` | 7 | Царцаасан дансны шалгалт |
 
