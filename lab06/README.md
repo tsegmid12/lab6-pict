@@ -178,20 +178,68 @@ $$
 - **`~` хэрэглэхэд A2-ын хязгаарлалт хэрэгтэй хэвээр үлдсэн үү?**
   - **Тийм, хэсэгчлэн үлдсэн.** `~` нь зөвхөн сөрөг утгуудыг хооронд нь холихоос сэргийлдэг тул эхний 4 `IF` дүрмийг (error-isolation) орлож чадна. Харин `[SINGLE]` (`ExactBalance`, `ExactLimit`-ийг энгийн орчинд барих) болон `[IF]` (`ExceedsLimit → PartiallySpent`) хязгаарлалтыг `~` орлохгүй тул [`transfer-neg.model`](transfer-neg.model)-д 3 `IF` дүрмийг заавал хэвээр үлдээсэн.
 
-**PICT мөрөөс бодит тест кейс (Лаб 5-ын хэв маягаар):**
+### B3. PICT мөрөөс тест кейс тодорхойлох ба Postman-аар баталгаажуулсан бодит үр дүн
+
+PICT-ийн [`results/transfer-neg.txt`](results/transfer-neg.txt) болон [`results/transfer-nc.txt`](results/transfer-nc.txt) файлын бодит мөрүүдээс 4 тест кейс сонгож, Лаб 5-ын жишгээр [`server.js`](server.js) API серверийг ажиллуулан [`lab06-postman-collection.json`](lab06-postman-collection.json) collection-оор Newman / Postman ашиглан бодитоор туршиж баталгаажуулав.
 
 > Мөрийн дугаарлалтад толгой мөр (файлын 1-р мөр)-ийг хассан **өгөгдлийн мөрийн дугаар** болон файлын бодит мөрийн дугаарыг хоёуланг нь тэмдэглэв.
 
-| Кейс | Эх сурвалж ба PICT мөр | Setup | Оролт (`POST /transfer`) | Oracle |
-|---|---|---|---|---|
-| **T01** *(Happy path)* | `transfer-neg.txt` өгөгдлийн #3 (мөр 4): `Active, OtherActive, Positive, UnderBalance, UnderLimit, CrossCurrency, ZeroSpent` | `ACC_A`: `MNT`, үлдэгдэл `1,000,000`, `frozen: false`, `usedToday: 0` (лимит `500,000`); `ACC_B`: `MNT`, үлдэгдэл `0`; ханш `1 USD = 3,400 MNT` | `{"from":"ACC_A","to":"ACC_B","amount":100,"currency":"USD"}` | `201 {"result":"OK"}`; `ACC_A` үлдэгдэл `660,000`, `ACC_B` `340,000`, `usedToday: 340,000` |
-| **T02** *(Сөрөг дүн)* | `transfer-neg.txt` өгөгдлийн #10 (мөр 11): `Active, OtherActive, ~Negative, UnderBalance, UnderLimit, CrossCurrency, ZeroSpent` | `ACC_A`: `MNT`, үлдэгдэл `1,000,000`, `frozen: false`, `usedToday: 0`; `ACC_B`: `MNT`, үлдэгдэл `0` | `{"from":"ACC_A","to":"ACC_B","amount":-50,"currency":"USD"}` | `200 {"result":"ERROR_BAD_AMOUNT"}`; үлдэгдэл өөрчлөгдөхгүй |
-| **T03** *(FX + Үлдэгдэл хэтэрсэн)* | `transfer-neg.txt` өгөгдлийн #9 (мөр 10): `Active, OtherActive, Positive, ~ExceedsBalance, UnderLimit, CrossCurrency, ZeroSpent` | `ACC_A`: `MNT`, үлдэгдэл `300,000`, `frozen: false`, `usedToday: 0` (лимит `1,000,000`); `ACC_B`: `MNT`, үлдэгдэл `0`; ханш `1 USD = 3,400 MNT` | `{"from":"ACC_A","to":"ACC_B","amount":100,"currency":"USD"}` *(хөрвүүлээд `340,000 > 300,000`)* | `200 {"result":"ERROR_INSUFFICIENT"}`; үлдэгдэл өөрчлөгдөхгүй |
-| **T04** *(Олон алдаатай мөр)* | `transfer-nc.txt` өгөгдлийн #2 (мөр 3): `Frozen, NotFound, Positive, ExceedsBalance, UnderLimit, SameAsAccount, ZeroSpent` | `ACC_F`: `MNT`, үлдэгдэл `50,000`, `frozen: true`, `usedToday: 0`; `ACC_MISSING` бүртгэлгүй | `{"from":"ACC_F","to":"ACC_MISSING","amount":200000,"currency":"MNT"}` | `200 {"result":"ERROR_FROZEN"}` *(давуу эрэмбээр `from > to > balance` тул `ERROR_NO_TO` буюу `ERROR_INSUFFICIENT` биш)* |
+#### B3.1. Сонгосон PICT тест кейсүүд
 
----
+| Кейс | Эх сурвалж ба PICT мөр | Файлын мөр | Зорилго |
+|---|---|---:|---|
+| **T01** *(Happy path)* | `transfer-neg.txt` өгөгдлийн #3: `Active, OtherActive, Positive, UnderBalance, UnderLimit, CrossCurrency, ZeroSpent` | мөр 4 | FX хөрвүүлэлттэй амжилттай шилжүүлэг (USD → MNT) |
+| **T02** *(Сөрөг дүн)* | `transfer-neg.txt` өгөгдлийн #10: `Active, OtherActive, ~Negative, UnderBalance, UnderLimit, CrossCurrency, ZeroSpent` | мөр 11 | Сөрөг дүнг хориглох шалгалт (`~Negative`) |
+| **T03** *(FX + Үлдэгдэл хүрэлцэхгүй)* | `transfer-neg.txt` өгөгдлийн #9: `Active, OtherActive, Positive, ~ExceedsBalance, UnderLimit, CrossCurrency, ZeroSpent` | мөр 10 | Ханш хөрвүүлсний дараа үлдэгдэл хүрэлцэхгүй алдаа (`~ExceedsBalance`) |
+| **T04** *(Олон алдааны давуу эрэмбэ)* | `transfer-nc.txt` өгөгдлийн #2: `Frozen, NotFound, Positive, ExceedsBalance, UnderLimit, SameAsAccount, ZeroSpent` | мөр 3 | Давхар алдаанд эх данс царцаагдсан алдаа түрүүлж илрэх (`from > to > balance`) |
 
-### B3. Гараар хийсэн A3 ба PICT-ийн харьцуулалт
+#### B3.2. Test Setup ба бодит хүсэлтийн параметрүүд
+
+- **Тогтмол ханш:** 1 USD = 3,400 MNT
+- **API Server:** [`server.js`](server.js) (`http://localhost:3000`)
+- **Postman Collection:** [`lab06-postman-collection.json`](lab06-postman-collection.json)
+
+| Кейс | Setup хүсэлтүүд (`PUT /accounts/:id`) | Шилжүүлгийн хүсэлт (`POST /transfer`) |
+|---|---|---|
+| **T01** | `PUT /accounts/ACC_A`: `{"balance":1000000, "currency":"MNT", "frozen":false, "dailyLimit":500000, "usedToday":0}`<br>`PUT /accounts/ACC_B`: `{"balance":0, "currency":"MNT", "frozen":false, "dailyLimit":500000, "usedToday":0}` | `{"from":"ACC_A", "to":"ACC_B", "amount":100, "currency":"USD"}` |
+| **T02** | `PUT /accounts/ACC_A`: `{"balance":1000000, "currency":"MNT", "frozen":false, "dailyLimit":500000, "usedToday":0}` | `{"from":"ACC_A", "to":"ACC_B", "amount":-50, "currency":"USD"}` |
+| **T03** | `PUT /accounts/ACC_A`: `{"balance":300000, "currency":"MNT", "frozen":false, "dailyLimit":1000000, "usedToday":0}` | `{"from":"ACC_A", "to":"ACC_B", "amount":100, "currency":"USD"}` *(100 USD = 340,000 MNT > 300,000 MNT)* |
+| **T04** | `PUT /accounts/ACC_F`: `{"balance":50000, "currency":"MNT", "frozen":true, "dailyLimit":500000, "usedToday":0}` | `{"from":"ACC_F", "to":"ACC_MISSING", "amount":200000, "currency":"MNT"}` |
+
+#### B3.3. Postman / Newman бодит тестийн үр дүн ба дансны үлдэгдлийн өөрчлөлт
+
+Node.js reference серверийг асаан Newman хэрэгслээр [`lab06-postman-collection.json`](lab06-postman-collection.json)-ийг ажиллуулж авсан бодит үр дүн:
+
+| Кейс | Бодит HTTP Status | Бодит Response Body | Дансны үлдэгдлийн бодит өөрчлөлт (`GET /accounts/:id`) | Тестийн үр дүн |
+|---|---:|---|---|---|
+| **T01** | **`201 Created`** | `{"result":"OK","transferID":1}` | **ACC_A:** `1,000,000 → 660,000 MNT` (буурсан: 340,000 MNT, `usedToday: 340,000`)<br>**ACC_B:** `0 → 340,000 MNT` (нэмэгдсэн: 340,000 MNT) | **PASS** (5/5 assertions) |
+| **T02** | **`200 OK`** | `{"result":"ERROR_BAD_AMOUNT"}` | **ACC_A:** `1,000,000 MNT` (үлдэгдэл өөрчлөгдөөгүй)<br>**ACC_B:** `0 MNT` (өөрчлөгдөөгүй) | **PASS** (3/3 assertions) |
+| **T03** | **`200 OK`** | `{"result":"ERROR_INSUFFICIENT"}` | **ACC_A:** `300,000 MNT` (үлдэгдэл өөрчлөгдөөгүй)<br>**ACC_B:** `0 MNT` (өөрчлөгдөөгүй) | **PASS** (3/3 assertions) |
+| **T04** | **`200 OK`** | `{"result":"ERROR_FROZEN"}` | **ACC_F:** `50,000 MNT` (царцаагдсан данс хэвээр, `from > to > balance` давуу эрэмбэ) | **PASS** (2/2 assertions) |
+
+**Newman гүйцэтгэлийн нотолгоо ([`results/postman-results.txt`](results/postman-results.txt)):**
+
+```text
+┌─────────────────────────┬─────────────────┬─────────────────┐
+│                         │        executed │          failed │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│              iterations │               1 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│                requests │              13 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│            test-scripts │              13 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│      prerequest-scripts │               0 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│              assertions │              19 │               0 │
+├─────────────────────────┴─────────────────┴─────────────────┤
+│ total run duration: 1122ms                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Нийт 13 хүсэлт, 19 assertions бүгд 100% амжилттай биелсэн.
+
+#### B3.4. Гараар хийсэн A3 ба PICT-ийн харьцуулалт
 
 | Шалгуур | Гараар хийсэн A3 хүснэгт | PICT (`transfer-neg.txt` / `transfer.txt`) |
 |---|---|---|

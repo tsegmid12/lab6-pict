@@ -1,0 +1,467 @@
+{
+  "info": {
+    "name": "Lab 06 — POST /transfer Combinatorial Verification",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "T01 — Happy Path (USD to MNT transfer)",
+      "item": [
+        {
+          "name": "1. Setup Sender ACC_A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Setup ACC_A status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Setup ACC_A result is OK', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql('OK');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 1000000,\n  \"currency\": \"MNT\",\n  \"frozen\": false,\n  \"dailyLimit\": 500000,\n  \"usedToday\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        },
+        {
+          "name": "2. Setup Recipient ACC_B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Setup ACC_B status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Setup ACC_B result is OK', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql('OK');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 0,\n  \"currency\": \"MNT\",\n  \"frozen\": false,\n  \"dailyLimit\": 500000,\n  \"usedToday\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_B",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_B"]
+            }
+          }
+        },
+        {
+          "name": "3. Execute Transfer (T01)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('T01 status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('T01 result is OK', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.eql('OK');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"ACC_A\",\n  \"to\": \"ACC_B\",\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["transfer"]
+            }
+          }
+        },
+        {
+          "name": "4. Verify Sender Balance After Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Sender ACC_A balance reduced by 340,000 MNT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.balance).to.eql(660000);",
+                  "    pm.expect(json.usedToday).to.eql(340000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        },
+        {
+          "name": "5. Verify Recipient Balance After Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Recipient ACC_B balance increased by 340,000 MNT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.balance).to.eql(340000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_B",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_B"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "T02 — Negative Amount Error",
+      "item": [
+        {
+          "name": "1. Setup Sender ACC_A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Setup ACC_A status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 1000000,\n  \"currency\": \"MNT\",\n  \"frozen\": false,\n  \"dailyLimit\": 500000,\n  \"usedToday\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        },
+        {
+          "name": "2. Execute Transfer (T02)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('T02 status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('T02 result is ERROR_BAD_AMOUNT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.eql('ERROR_BAD_AMOUNT');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"ACC_A\",\n  \"to\": \"ACC_B\",\n  \"amount\": -50,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["transfer"]
+            }
+          }
+        },
+        {
+          "name": "3. Verify Sender Balance Unchanged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Sender ACC_A balance unchanged at 1,000,000 MNT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.balance).to.eql(1000000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "T03 — Insufficient Balance Error with FX Conversion",
+      "item": [
+        {
+          "name": "1. Setup Sender ACC_A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Setup ACC_A status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 300000,\n  \"currency\": \"MNT\",\n  \"frozen\": false,\n  \"dailyLimit\": 1000000,\n  \"usedToday\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        },
+        {
+          "name": "2. Execute Transfer (T03)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('T03 status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('T03 result is ERROR_INSUFFICIENT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.eql('ERROR_INSUFFICIENT');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"ACC_A\",\n  \"to\": \"ACC_B\",\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["transfer"]
+            }
+          }
+        },
+        {
+          "name": "3. Verify Sender Balance Unchanged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Sender ACC_A balance unchanged at 300,000 MNT', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.balance).to.eql(300000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_A",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_A"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "T04 — Frozen Sender Error Precedence",
+      "item": [
+        {
+          "name": "1. Setup Frozen Sender ACC_F",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Setup ACC_F status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 50000,\n  \"currency\": \"MNT\",\n  \"frozen\": true,\n  \"dailyLimit\": 500000,\n  \"usedToday\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/ACC_F",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "ACC_F"]
+            }
+          }
+        },
+        {
+          "name": "2. Execute Transfer (T04)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('T04 status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('T04 result is ERROR_FROZEN', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.eql('ERROR_FROZEN');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"ACC_F\",\n  \"to\": \"ACC_MISSING\",\n  \"amount\": 200000,\n  \"currency\": \"MNT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["transfer"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
