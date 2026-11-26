@@ -28,37 +28,111 @@ POST /transfer { "from": ID, "to": ID, "amount": NUM, "currency": CODE }
 
 **Олон алдааны давуу эрэмбэ (Error Precedence):** Тодорхойлолтод давхар алдааны дарааллыг заагаагүй тул шалгах дарааллыг **`SenderAccount (from) → RecipientAccount (to) → AmountInput (≤ 0) → BalanceFit → DailyLimitFit`** гэж тогтоов; учир нь байхгүй эсвэл царцаагдсан эх дансны үлдэгдэл, хүлээн авагч болон хөрвүүлэлтийг шалгах боломжгүй бөгөөд `amount ≤ 0` үед үлдэгдэл, лимит харьцуулах утгагүй юм.
 
-### A1. Сонголт ба төлөөлөх утгууд
+### A3. Гараар тодорхойлсон тест кейсүүд
 
-`POST /transfer`-ийн оролт болон серверийн далд төлөв (`PriorDailySpend`) дээр тулгуурлан 7 ангилал (category), 18 төлөөлөх утгыг өөрөө зохиов.
+| ID | From | To | Amount | Currency | DailyUsed | Хүлээгдэх үр дүн |
+|---|---|---|---|---|---|---|
+| A01 | Valid | Valid | Normal | Same | None | Амжилттай шилжүүлэг |
+| A02 | Frozen | Valid | Normal | Same | None | Илгээгч царцаасан алдаа |
+| A03 | Missing | Valid | Normal | Same | None | Илгээгчийн данс олдохгүй |
+| A04 | Valid | Missing | Normal | Same | None | Хүлээн авагч олдохгүй |
+| A05 | Valid | SameAsFrom | Normal | Same | None | Ижил дансны алдаа |
+| A06 | Valid | Valid | Zero | Same | None | Дүн тэг байх алдаа |
+| A07 | Valid | Valid | Negative | Same | None | Сөрөг дүнгийн алдаа |
+| A08 | Valid | Valid | OverBalance | Same | None | Үлдэгдэл хүрэлцэхгүй |
+| A09 | Valid | Valid | OverLimit | Same | Partial | Өдрийн лимит хэтэрсэн |
+| A10 | Valid | Valid | EqualBalance | Same | None | Үлдэгдэлтэй тэнцүү дүнгийн boundary |
+| A11 | Valid | Valid | EqualLimit | Same | Partial | Лимиттэй тэнцүү дүнгийн boundary |
+| A12 | Valid | Valid | Normal | Different | None | Валют хөрвүүлэлттэй шилжүүлэг |
+| A13 | Missing | Missing | Normal | Same | None | From алдааны давуу эрэмбэ |
 
-| # | Ангилал (Category) | Төлөөлөх утга | Тэмдэглэгээ | Тайлбар |
-|---|---|---|---|---|
-| 1 | `SenderAccount` (`from`) | `Active` | `[property SenderOK]` | Байгаа, идэвхтэй (царцаагдаагүй) эх данс |
-|   |  | `Frozen` | `[ERROR]` | Царцаагдсан эх данс → `ERROR_FROZEN` |
-|   |  | `NotFound` | `[ERROR]` | Системд байхгүй эх данс → `ERROR_NO_FROM` |
-| 2 | `RecipientAccount` (`to`) | `OtherActive` | `[property RecipientOK]` | Байгаа, `from`-оос өөр хүлээн авагч данс |
-|   |  | `NotFound` | `[ERROR]` | Системд байхгүй хүлээн авагч → `ERROR_NO_TO` |
-|   |  | `DuplicateSender` | `[ERROR]` | `from`-той ижил данс → `ERROR_SAME_ACCOUNT` |
-| 3 | `AmountInput` (`amount`-ийн тэмдэг) | `Positive` | `[property PositiveAmt]` | Эерэг тоон утга (`amount > 0`) |
-|   |  | `Zero` | `[ERROR]` | `0` дүн → `ERROR_BAD_AMOUNT` |
-|   |  | `Negative` | `[ERROR]` | Сөрөг дүн (`< 0`) → `ERROR_BAD_AMOUNT` |
-| 4 | `BalanceFit` *(хөрвүүлсний дараа)* | `UnderBalance` | `[IF PositiveAmt]` | Үлдэгдлээс бага дүн |
-|   |  | `ExactBalance` | `[IF PositiveAmt] [SINGLE]` | Яг үлдэгдэлтэй тэнцүү дүн (boundary) |
-|   |  | `ExceedsBalance` | `[IF PositiveAmt] [ERROR]` | Үлдэгдлээс их дүн → `ERROR_INSUFFICIENT` |
-| 5 | `DailyLimitFit` *(хөрвүүлсний дараа)* | `UnderLimit` | `[IF PositiveAmt]` | Өдрийн үлдсэн лимитээс бага дүн |
-|   |  | `ExactLimit` | `[IF PositiveAmt] [SINGLE]` | Яг өдрийн үлдсэн лимиттэй тэнцүү дүн (boundary) |
-|   |  | `ExceedsLimit` | `[IF PositiveAmt] [ERROR]` | Өдрийн үлдсэн лимитээс их дүн → `ERROR_LIMIT` |
-| 6 | `CurrencyMode` (`currency`) | `SameAsAccount` | — | Дансны үндсэн валюттай ижил (хөрвүүлэлтгүй) |
-|   |  | `CrossCurrency` | `[property FX]` | Өөр валют (жишээ нь USD → MNT хөрвүүлэлттэй) |
-| 7 | `PriorDailySpend` *(далд орчин)* | `ZeroSpent` | — | Тухайн өдөр өмнө нь огт шилжүүлэг хийгээгүй (`usedToday = 0`) |
-|   |  | `PartiallySpent` | `[property HasSpent]` | Өдрийн лимитийн хэсгийг урьдчилж зарцуулсан (`usedToday > 0`) |
+**Тайлбар:** A10 болон A11 нь гараар тодорхойлсон нэмэлт boundary тестүүд. `EqualBalance`, `EqualLimit` утгууд одоогийн `transfer.model` файлд байхгүй тул эдгээр нь PICT-ээр үүсгэсэн тест биш.
 
-**Далд орчны сонголтын тайлбар:** `BalanceFit`, `DailyLimitFit`, `PriorDailySpend` нь хүсэлтийн JSON биед шууд харагдахгүй боловч серверийн төлөв (`balance`, `dailyLimit`, `usedToday`, ханш) дээр тулгуурлан яг ижил хүсэлтийг амжилттай эсвэл `ERROR_INSUFFICIENT` / `ERROR_LIMIT` болгодог далд орчны хүчин зүйлүүд юм.
+A13 тестийн Amount-ийг `Normal` гэж зассан. Учир нь `transfer.model`-ийн IF constraint-ийн дагуу From эсвэл To хүчинтэй биш үед Amount = Normal байх ёстой.
 
-### A2. Хязгаарлалтууд ба комбинацийн тооцоо
+Олон алдаа зэрэг үүссэн тохиолдолд `From → To → Amount` гэсэн шалгах дарааллыг ашиглан аль алдаа түрүүлж илрэхийг тодорхойлов.
 
-| Тэмдэглэгээ | Хамаарах утга | Үндэслэл |
+## 3. B — PICT ашиглан Combinatorial Testing хийх
+
+### B1. Browser model — 2-way болон 3-way testing
+
+Browser-ийн тохиргооны параметрүүдийг `browser.model` файлд тодорхойлж, PICT ашиглан 2-way болон 3-way covering array үүсгэв.
+
+Параметрүүд:
+
+- Content: Allow, Restrict, Block
+- Cookies: Allow, Restrict, Block
+- Popups: Yes, No
+- Addons: Yes, No
+- Attacks: Yes, No
+- Forgeries: Yes, No
+
+Бүрэн комбинацийн тоо:
+
+\[
+3 \times 3 \times 2 \times 2 \times 2 \times 2 = 144
+\]
+
+| Тестийн төрөл | Бүрэн комбинаци | PICT-ийн үүсгэсэн мөр |
+|---|---:|---:|
+| 2-way | 144 | 10 |
+| 3-way | 144 | 20 |
+
+2-way testing нь параметрүүдийн бүх боломжит хос утгын хослолыг хамруулах зорилготой.
+
+3-way testing нь гурван параметрийн бүх боломжит утгын хослолыг хамруулах зорилготой.
+
+Үр дүнгийн файлууд:
+
+- `results/browser-2way.txt`
+- `results/browser-3way.txt`
+
+### B2. Transfer model-уудын үр дүнгийн харьцуулалт
+
+Мөнгө шилжүүлэх үйлдлийн хувьд гурван өөр PICT model үүсгэн, constraint болон negative testing-ийн үр дүнг харьцуулав.
+
+**Happy Path шалгуур:**
+
+- From = Valid
+- To = Valid
+- Amount = Normal
+
+| Үр дүнгийн файл | Арга | Нийт мөр | Happy Path | Бусад мөр |
+|---|---|---:|---:|---:|
+| `transfer-nc.txt` | IF constraint ашиглаагүй | 17 | 0 | 17 |
+| `transfer.txt` | IF constraint ашигласан | 16 | 0 | 16 |
+| `transfer-neg.txt` | Negative testing (`~`) | 30 | 5 | 25 |
+
+**Үр дүнгийн тайлбар:**
+
+1. `transfer-nc.model` нь нэмэлт IF constraint-гүйгээр тестийн хувилбарууд үүсгэсэн.
+2. `transfer.model` нь IF нөхцөлөөр зарим комбинацийг хязгаарласан.
+3. `transfer-neg.model` нь `~` тэмдэглэгээг ашиглан сөрөг тестийн нөхцөлүүдийг тодорхойлсон.
+4. `transfer-neg.txt` файлд 5 Happy Path болон 25 бусад тестийн мөр байна.
+
+Эдгээр model-ийн параметрүүд бүрэн ижил биш тул мөрийн тооны ялгааг зөвхөн IF constraint-ийн нөлөө гэж дүгнэхгүй.
+
+Үр дүнгийн файлууд:
+
+- `results/transfer-nc.txt`
+- `results/transfer.txt`
+- `results/transfer-neg.txt`
+
+### B3. PICT мөрөөс тест кейс болон Oracle тодорхойлох
+
+`results/transfer-neg.txt` файлын бодит мөрүүдээс гурван тест кейс сонгов.
+
+#### B3.1. Сонгосон PICT тест кейсүүд
+
+| Test ID | PICT мөр | Файл дахь мөр | Зорилго |
+|---|---|---:|---|
+| T01 | `Valid, Valid, Normal, Same, ATM` | 2 | Happy Path |
+| T02 | `Valid, Valid, ~Negative, Different, Web` | 11 | Сөрөг дүнгийн шалгалт |
+| T03 | `~Frozen, Valid, Normal, Different, Mobile` | 7 | Царцаасан дансны шалгалт |
+
+#### B3.2. Test setup
+
+| Test ID | Setup | Request-ийн үндсэн нөхцөл |
 |---|---|---|
 | `[ERROR]` | `SenderAccount`: `Frozen`, `NotFound` | Эх дансны алдаа шууд `ERROR_FROZEN` эсвэл `ERROR_NO_FROM` буцаах тул бусад оролтыг хүчинтэй байлгаж error masking-аас сэргийлнэ. |
 | `[ERROR]` | `RecipientAccount`: `NotFound`, `DuplicateSender` | Хүлээн авагч буруу үед дүн болон үлдэгдлийн алдааг холихгүйн тулд бусад сонголтыг хүчинтэй барина. |
