@@ -1,5 +1,7 @@
-From: Valid, Frozen, Missing
-To: Valid, Missing, SameAsFrom
-Amount: Normal, Zero, Negative, OverBalance, OverLimit
-Currency: Same, Different
-Authentication: OTP, Password, None
+SenderAccount: Active, Frozen, NotFound
+RecipientAccount: OtherActive, NotFound, DuplicateSender
+AmountInput: Positive, Zero, Negative
+BalanceFit: UnderBalance, ExactBalance, ExceedsBalance
+DailyLimitFit: UnderLimit, ExactLimit, ExceedsLimit
+CurrencyMode: SameAsAccount, CrossCurrency
+PriorDailySpend: ZeroSpent, PartiallySpent

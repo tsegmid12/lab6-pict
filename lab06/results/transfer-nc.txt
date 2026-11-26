@@ -1,18 +1,15 @@
-From	To	Amount	Currency	Authentication
-Frozen	Valid	OverLimit	Same	OTP
-Frozen	SameAsFrom	Normal	Different	None
-Valid	Missing	Zero	Same	None
-Valid	Valid	Negative	Different	Password
-Missing	Missing	OverBalance	Same	Password
-Valid	SameAsFrom	Normal	Same	OTP
-Missing	Missing	OverLimit	Different	OTP
-Frozen	Valid	Zero	Different	Password
-Missing	Missing	Negative	Same	None
-Frozen	SameAsFrom	OverBalance	Different	OTP
-Missing	SameAsFrom	Zero	Same	OTP
-Missing	Valid	OverLimit	Same	None
-Valid	SameAsFrom	OverLimit	Different	Password
-Missing	Valid	Normal	Different	Password
-Frozen	Missing	Normal	Different	OTP
-Frozen	SameAsFrom	Negative	Different	OTP
-Valid	Valid	OverBalance	Same	None
+SenderAccount	RecipientAccount	AmountInput	BalanceFit	DailyLimitFit	CurrencyMode	PriorDailySpend
+Active	DuplicateSender	Zero	UnderBalance	UnderLimit	CrossCurrency	PartiallySpent
+Frozen	NotFound	Positive	ExceedsBalance	UnderLimit	SameAsAccount	ZeroSpent
+NotFound	NotFound	Negative	ExactBalance	ExceedsLimit	CrossCurrency	PartiallySpent
+Frozen	OtherActive	Positive	UnderBalance	ExceedsLimit	CrossCurrency	ZeroSpent
+NotFound	OtherActive	Positive	ExceedsBalance	ExactLimit	SameAsAccount	PartiallySpent
+Active	DuplicateSender	Negative	UnderBalance	ExactLimit	SameAsAccount	ZeroSpent
+NotFound	DuplicateSender	Zero	ExactBalance	ExceedsLimit	SameAsAccount	ZeroSpent
+Active	NotFound	Zero	ExceedsBalance	ExceedsLimit	CrossCurrency	PartiallySpent
+Active	OtherActive	Positive	ExactBalance	ExactLimit	CrossCurrency	ZeroSpent
+Frozen	OtherActive	Zero	ExactBalance	UnderLimit	CrossCurrency	PartiallySpent
+Frozen	DuplicateSender	Negative	ExceedsBalance	ExactLimit	SameAsAccount	ZeroSpent
+NotFound	NotFound	Zero	UnderBalance	ExactLimit	CrossCurrency	PartiallySpent
+NotFound	OtherActive	Negative	ExceedsBalance	UnderLimit	CrossCurrency	PartiallySpent
+Frozen	DuplicateSender	Positive	ExceedsBalance	UnderLimit	SameAsAccount	PartiallySpent

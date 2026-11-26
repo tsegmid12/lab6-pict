@@ -1,17 +1,19 @@
-From	To	Amount	Currency	DailyUsed
-Valid	Valid	OverBalance	Different	None
-Valid	Valid	Negative	Different	Partial
-Valid	Valid	OverLimit	Different	Partial
-Valid	SameAsFrom	Normal	Same	None
-Missing	Valid	Normal	Same	Partial
-Frozen	Valid	Normal	Same	None
-Valid	Valid	OverBalance	Same	Partial
-Valid	Valid	Zero	Same	Partial
-Valid	Missing	Normal	Same	None
-Valid	Valid	Zero	Different	None
-Missing	Missing	Normal	Different	None
-Missing	SameAsFrom	Normal	Different	Partial
-Frozen	SameAsFrom	Normal	Different	Partial
-Valid	Valid	OverLimit	Same	Partial
-Valid	Valid	Negative	Same	None
-Frozen	Missing	Normal	Different	Partial
+SenderAccount	RecipientAccount	AmountInput	BalanceFit	DailyLimitFit	CurrencyMode	PriorDailySpend
+Active	NotFound	Positive	UnderBalance	UnderLimit	SameAsAccount	PartiallySpent
+Active	DuplicateSender	Positive	UnderBalance	UnderLimit	SameAsAccount	ZeroSpent
+NotFound	OtherActive	Positive	UnderBalance	UnderLimit	SameAsAccount	PartiallySpent
+Active	OtherActive	Positive	ExceedsBalance	UnderLimit	CrossCurrency	ZeroSpent
+Active	OtherActive	Negative	UnderBalance	UnderLimit	CrossCurrency	ZeroSpent
+Active	OtherActive	Zero	UnderBalance	UnderLimit	CrossCurrency	PartiallySpent
+Active	OtherActive	Positive	UnderBalance	ExceedsLimit	SameAsAccount	PartiallySpent
+NotFound	OtherActive	Positive	UnderBalance	UnderLimit	CrossCurrency	ZeroSpent
+Frozen	OtherActive	Positive	UnderBalance	UnderLimit	SameAsAccount	PartiallySpent
+Active	OtherActive	Positive	ExceedsBalance	UnderLimit	SameAsAccount	PartiallySpent
+Active	OtherActive	Negative	UnderBalance	UnderLimit	SameAsAccount	PartiallySpent
+Active	OtherActive	Positive	ExactBalance	UnderLimit	SameAsAccount	ZeroSpent
+Active	DuplicateSender	Positive	UnderBalance	UnderLimit	CrossCurrency	PartiallySpent
+Active	OtherActive	Positive	UnderBalance	ExceedsLimit	CrossCurrency	PartiallySpent
+Active	OtherActive	Zero	UnderBalance	UnderLimit	SameAsAccount	ZeroSpent
+Frozen	OtherActive	Positive	UnderBalance	UnderLimit	CrossCurrency	ZeroSpent
+Active	NotFound	Positive	UnderBalance	UnderLimit	CrossCurrency	ZeroSpent
+Active	OtherActive	Positive	UnderBalance	ExactLimit	SameAsAccount	PartiallySpent

@@ -1,9 +1,15 @@
-From: Valid, Frozen, Missing
-To: Valid, Missing, SameAsFrom
-Amount: Normal, Zero, Negative, OverBalance, OverLimit
-Currency: Same, Different
-DailyUsed: None, Partial
+SenderAccount: Active, Frozen, NotFound
+RecipientAccount: OtherActive, NotFound, DuplicateSender
+AmountInput: Positive, Zero, Negative
+BalanceFit: UnderBalance, ExactBalance, ExceedsBalance
+DailyLimitFit: UnderLimit, ExactLimit, ExceedsLimit
+CurrencyMode: SameAsAccount, CrossCurrency
+PriorDailySpend: ZeroSpent, PartiallySpent
 
-IF [From] <> "Valid" THEN [Amount] = "Normal";
-IF [To] <> "Valid" THEN [Amount] = "Normal";
-IF [Amount] = "OverLimit" THEN [DailyUsed] = "Partial";
+IF [SenderAccount] <> "Active" THEN [RecipientAccount] = "OtherActive" AND [AmountInput] = "Positive" AND [BalanceFit] = "UnderBalance" AND [DailyLimitFit] = "UnderLimit";
+IF [RecipientAccount] <> "OtherActive" THEN [AmountInput] = "Positive" AND [BalanceFit] = "UnderBalance" AND [DailyLimitFit] = "UnderLimit";
+IF [AmountInput] <> "Positive" THEN [BalanceFit] = "UnderBalance" AND [DailyLimitFit] = "UnderLimit";
+IF [BalanceFit] = "ExceedsBalance" THEN [DailyLimitFit] = "UnderLimit";
+IF [BalanceFit] = "ExactBalance" THEN [SenderAccount] = "Active" AND [RecipientAccount] = "OtherActive" AND [AmountInput] = "Positive" AND [DailyLimitFit] = "UnderLimit" AND [CurrencyMode] = "SameAsAccount" AND [PriorDailySpend] = "ZeroSpent";
+IF [DailyLimitFit] = "ExactLimit" THEN [SenderAccount] = "Active" AND [RecipientAccount] = "OtherActive" AND [AmountInput] = "Positive" AND [BalanceFit] = "UnderBalance" AND [CurrencyMode] = "SameAsAccount" AND [PriorDailySpend] = "PartiallySpent";
+IF [DailyLimitFit] = "ExceedsLimit" THEN [PriorDailySpend] = "PartiallySpent";
